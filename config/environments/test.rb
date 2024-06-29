@@ -26,7 +26,23 @@ Rails.application.configure do
   # Show full error reports and disable caching.
   config.consider_all_requests_local = true
   config.action_controller.perform_caching = false
-  config.cache_store = :null_store
+
+	# Testing redis cache
+  config.cache_store = :redis_cache_store, {
+    url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1"),
+    namespace: "cache"
+  }
+
+	# Testing redis session store
+  config.session_store :redis_session_store, 
+    key: '_traders_journal_session_test',
+    redis: {
+      expire_after: 60.minutes,  # cookie expiration
+      key_prefix: 'tradersjournal:test:session:',
+      url: ENV.fetch("REDIS_URL", "redis://localhost:6379/1")
+    },
+    serializer: :hybrid, # migrate from Marshal to JSON
+    on_redis_down: ->(*a) { Rails.logger.error("Redis down! #{a.inspect}") }
 
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable

@@ -10,6 +10,12 @@
 /.env*
 !/.env*.erb
 
+# Ignore system-specific files for macOS
+.DS_Store
+
+# Ignore the Redis dump file.
+dump.rdb
+
 # Ignore all default key files.
 /config/master.key
 /config/credentials/*.key

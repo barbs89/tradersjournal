@@ -29,6 +29,12 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
+# Ignore system-specific files for macOS
+.DS_Store
+
+# Ignore Redis dump file.
+dump.rdb
+
 /public/assets
 
 # Ignore master key for decrypting credentials and more.

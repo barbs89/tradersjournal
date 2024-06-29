@@ -1,10 +1,15 @@
-# This file is copied to spec/ when you run 'rails generate rspec:install'
-require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
+require 'spec_helper'
+require 'mock_redis'
+require 'capybara/rspec'
+require 'rspec/rails'
+
+# Automatically require all files in the `spec/support` directory
+Dir[Rails.root.join('spec/support/**/*.rb')].each { |file| require file }
+
+ENV['RAILS_ENV'] ||= 'test'
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
-require 'rspec/rails'
 
 begin
   ActiveRecord::Migration.maintain_test_schema!
@@ -13,12 +18,31 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 
 RSpec.configure do |config|
+	# Test formatting
 	config.formatter = :documentation
 
+	# Include the WaitHelper module
+  config.include WaitHelper
+
+	# Include the RedisHelper module
+	config.include RedisHelper
+
+	# Include ActiveSupport testing time helpers
+  config.include ActiveSupport::Testing::TimeHelpers
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_paths = [
-    Rails.root.join('spec/fixtures')
-  ]
+  # config.fixture_paths = [
+  #   Rails.root.join('spec/fixtures')
+  # ]
+
+	# Simulate Redis interactions in tests without requiring an actual Redis server. 
+	config.before(:each) do
+    # Replace the Redis instance with MockRedis
+    allow(Redis).to receive(:new).and_return(MockRedis.new)
+  end
+
+	# Set Capybara default max wait time
+  Capybara.default_max_wait_time = 5 # seconds
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
